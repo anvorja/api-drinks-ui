@@ -15,7 +15,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { useAuth } from "@/hooks/useAuth"
-import { ACCOUNT_NAV, MAIN_NAV } from "./nav"
+import { ACCOUNT_NAV, isNavItemVisible, MAIN_NAV } from "./nav"
 import { ThemeToggle } from "./ThemeToggle"
 import { UserMenu } from "./UserMenu"
 
@@ -106,7 +106,7 @@ export function SiteHeader({ onSearch }: SiteHeaderProps) {
               </SheetHeader>
               <nav aria-label="Menú" className="flex flex-col gap-1 px-4">
                 {[...MAIN_NAV, ...ACCOUNT_NAV]
-                  .filter((item) => !item.auth || user)
+                  .filter((item) => isNavItemVisible(item, user))
                   .map((item) => (
                     <NavLink
                       key={item.to}

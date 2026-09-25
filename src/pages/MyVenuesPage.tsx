@@ -13,14 +13,13 @@ import { useCreateVenue, useMyVenues } from "@/hooks/api/useVenues"
 import { useAuth } from "@/hooks/useAuth"
 import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 import { errorMessage } from "@/lib/api/errors"
-
-const CAN_OWN = new Set(["venue_owner", "admin"])
+import { canManageVenues } from "@/lib/entitlements"
 
 export default function MyVenuesPage() {
   useDocumentTitle("Mi bar")
   const { user } = useAuth()
   const venues = useMyVenues()
-  const canOwn = user ? CAN_OWN.has(user.role) : false
+  const canOwn = canManageVenues(user?.role)
 
   if (venues.data?.length === 1) {
     return <Navigate to={`/mi-bar/${venues.data[0]!.id}`} replace />
@@ -58,8 +57,13 @@ export default function MyVenuesPage() {
         ) : (
           <EmptyState
             icon={Store01Icon}
-            title="Esta sección es para dueños de bar"
-            description="Tu cuenta no tiene el rol de dueño de bar. Pide a un admin que te lo asigne, o entra con la cuenta demo del bar."
+            title="Las herramientas de bar son para cuentas de bar"
+            description="Tu cuenta es personal. Si administras un bar, pide a un administrador que la convierta en cuenta de bar. Mientras tanto, tu plan te da acceso a la API."
+            action={
+              <Button asChild className="rounded-full">
+                <Link to="/cuenta#api">Ver mi acceso a la API</Link>
+              </Button>
+            }
           />
         )}
       </div>

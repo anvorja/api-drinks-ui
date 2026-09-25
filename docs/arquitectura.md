@@ -92,6 +92,25 @@ useAuth() ─────────────→ componentes ←────
 - **Reintentos:** TanStack Query no reintenta errores 4xx. Con `429` espera lo que dice
   `Retry-After`.
 
+## Qué ofrece cada cuenta
+
+`src/lib/entitlements.ts` es el único lugar que traduce el rol y el plan en qué se ofrece. La API
+es la que hace cumplir los permisos; la interfaz solo evita mostrar botones que terminan en
+"no permitido".
+
+- **`canManageVenues(role)`:** true para `venue_owner` y `admin`. Decide si aparece "Mi bar" en el
+  menú (`visible` en `nav.ts`).
+- **`planPerks(plan)`:** agrupa los límites del plan en dos grupos:
+  - **"Para tu bar":** bares, inventario y carta con márgenes;
+  - **"API para tus integraciones":** llaves y peticiones al día.
+- **`usablePerkGroups(role)`:** qué grupos puede usar la cuenta. En `/planes`, una cuenta personal
+  ve los beneficios de bar atenuados y marcados "Cuentas de bar".
+- **`nextStepAfterUpgrade(role)`:** adónde lleva el botón principal después de pagar.
+
+Una cuenta personal que compra Pro gana más llaves de API (3 en lugar de 1) y más peticiones al
+día (10.000 en lugar de 100). Las gestiona en _Mi cuenta → API para tus integraciones_. El secreto
+de una llave se muestra una sola vez: vive en el estado del componente, nunca en la caché.
+
 ## Rutas
 
 | Ruta                                                                       | Sesión | Pantalla                                                      |
@@ -108,7 +127,7 @@ useAuth() ─────────────→ componentes ←────
 | `/cocktle`                                                                 | ✔      | Reto diario (clásico o zero)                                  |
 | `/pago/resultado`                                                          | ✔      | Vuelta de Wompi: verifica y reintenta mientras esté pendiente |
 | `/mi-bar`, `/mi-bar/:id`                                                   | ✔      | Carta inteligente, "te falta poco", inventario                |
-| `/cuenta`                                                                  | ✔      | Perfil, plan, pagos y favoritas                               |
+| `/cuenta`                                                                  | ✔      | Perfil, plan, llaves de API (`#api`), pagos y favoritas       |
 
 Las rutas con sesión pasan por `<RequireAuth>`. Sin sesión, llevan a `/entrar?next=<ruta>` y,
 al entrar, se vuelve a la misma pantalla. `safeNext` solo acepta rutas propias, así que no se

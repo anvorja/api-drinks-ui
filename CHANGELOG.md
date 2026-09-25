@@ -7,6 +7,21 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y
 
 ### Añadido
 
+- **Llaves de API en Mi cuenta.**
+  - Muestra la cuota del día.
+  - Permite crear una llave (el secreto se ve una sola vez, con un ejemplo `curl` listo) y
+    revocarla con confirmación.
+- **Beneficios según la cuenta.**
+  - En los planes, los beneficios se agrupan en "Para tu bar" y "API para tus integraciones".
+  - Una cuenta personal ve atenuados los beneficios que no puede usar.
+  - Después de pagar, el botón lleva a lo que el plan desbloquea para esa cuenta.
+- **Recorrido de la vuelta desde Wompi en producción** (`docs/despliegue.md`).
+
+### Cambiado
+
+- "Mi bar" solo aparece en el menú de las cuentas de bar y de administración.
+- Una cuenta personal que abre `/mi-bar` ve cómo acceder a la API en lugar de un callejón sin
+  salida.
 - **Archivos de entorno ordenados.** Igual que en la API: `.env.example` (plantilla versionada),
   `.env` (local, antes `.env.local`) y `.env.production` (Netlify). Los dos últimos están en
   `.gitignore`.

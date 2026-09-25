@@ -11,13 +11,23 @@ import {
 } from "@hugeicons/core-free-icons"
 import type { IconSvgElement } from "@hugeicons/react"
 
+import type { User } from "@/lib/auth/session"
+import { canManageVenues } from "@/lib/entitlements"
+
 export type NavItem = {
   to: string
   label: string
   icon: IconSvgElement
   /** Shown to signed-in people only. */
   auth?: boolean
+  /** Extra condition on the account (e.g. bar tools only for bar accounts). */
+  visible?: (user: User) => boolean
 }
+
+/** Whether an item belongs in the menu for this person. */
+export const isNavItemVisible = (item: NavItem, user: User | null) =>
+  (!item.auth || user !== null) &&
+  (!item.visible || (user !== null && item.visible(user)))
 
 /** Main sections, in the order of the demo walkthrough. */
 export const MAIN_NAV: NavItem[] = [
@@ -39,6 +49,12 @@ export const TAB_NAV: NavItem[] = [
 
 export const ACCOUNT_NAV: NavItem[] = [
   { to: "/cuenta", label: "Mi cuenta", icon: UserCircleIcon, auth: true },
-  { to: "/mi-bar", label: "Mi bar", icon: Store01Icon, auth: true },
+  {
+    to: "/mi-bar",
+    label: "Mi bar",
+    icon: Store01Icon,
+    auth: true,
+    visible: (user) => canManageVenues(user.role),
+  },
   { to: "/planes", label: "Planes", icon: CrownIcon },
 ]

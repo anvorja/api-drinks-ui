@@ -19,36 +19,28 @@ import {
 import { useAuth } from "@/hooks/useAuth"
 import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 import { errorMessage } from "@/lib/api/errors"
+import {
+  canManageVenues,
+  planPerks,
+  usablePerkGroups,
+} from "@/lib/entitlements"
 import { formatDate, formatMoney } from "@/lib/format"
 
 const PITCH: Record<string, string> = {
-  free: "Para probar con tu bar y tu despensa.",
-  pro: "Para el bar que quiere vender mejor cada coctel.",
+  free: "Para empezar: tu bar y tus primeras integraciones.",
+  pro: "Para el bar que quiere vender mejor cada coctel, y para tus apps.",
   business: "Para cadenas e integraciones sin límites.",
 }
 
 const RECOMMENDED = "pro"
 
-function features(plan: Plan) {
-  const { limits } = plan
-  const many = (n: number | null, one: string, other: string) =>
-    n === null ? `${other} ilimitados` : `${n} ${n === 1 ? one : other}`
-  return [
-    many(limits.venues, "bar", "bares"),
-    `${limits.inventoryItems === null ? "Inventario ilimitado" : `${limits.inventoryItems} ítems de inventario`}`,
-    limits.menuPricing
-      ? "Carta con costo, precio sugerido y margen"
-      : "Carta sin costos ni márgenes",
-    many(limits.apiKeys, "llave de API", "llaves de API"),
-    `${limits.apiDailyRequests.toLocaleString("es-CO")} peticiones de API al día`,
-  ]
-}
-
 export default function PlansPage() {
   useDocumentTitle("Planes")
+  const { user } = useAuth()
   const plans = usePlans()
   const mine = useMySubscription()
   const currentPlanId = mine.data?.plan.id
+  const personal = user !== null && !canManageVenues(user.role)
 
   return (
     <Page>
@@ -60,7 +52,7 @@ export default function PlansPage() {
             Cobra lo que vale <span className="text-gradient">cada coctel</span>
           </>
         }
-        description="Descubrir, jugar y compartir tu ADN es gratis siempre. Los planes son para bares que quieren su carta con números."
+        description="Descubrir, jugar y compartir tu ADN es gratis siempre. Los planes son para bares que quieren su carta con números y para quienes integran nuestra API."
       />
 
       {mine.data?.subscription && (
@@ -70,6 +62,14 @@ export default function PlansPage() {
             ? "hasta"
             : "· se renueva el"}{" "}
           {formatDate(mine.data.subscription.currentPeriodEnd)}
+        </p>
+      )}
+
+      {personal && (
+        <p className="mx-auto mt-6 max-w-2xl rounded-2xl border border-border bg-card px-5 py-4 text-center text-sm text-pretty">
+          Tu cuenta es <strong>personal</strong>: de cada plan aprovechas la{" "}
+          <strong>API para tus integraciones</strong>. Las herramientas de bar
+          se activan en cuentas de bar.
         </p>
       )}
 
@@ -148,7 +148,7 @@ function PlanCard({
       )}
     >
       {recommended && (
-        <span className="absolute -top-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full bg-gradient-to-r from-coral to-amber px-3 py-1 text-xs font-bold text-night">
+        <span className="absolute -top-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full bg-gradient-to-r from-coral to-amber px-3 py-1 text-xs font-bold whitespace-nowrap text-night">
           <Icon icon={CrownIcon} className="size-3.5" /> El favorito de los
           bares
         </span>
@@ -163,17 +163,38 @@ function PlanCard({
         </span>
         {!free && <span className="text-muted-foreground">/mes</span>}
       </p>
-      <ul className="mt-6 flex-1 space-y-3 text-sm">
-        {features(plan).map((feature) => (
-          <li key={feature} className="flex gap-2">
-            <Icon
-              icon={CheckmarkCircle02Icon}
-              className="size-5 text-success"
-            />
-            {feature}
-          </li>
-        ))}
-      </ul>
+      <div className="mt-6 flex-1 space-y-5 text-sm">
+        {planPerks(plan).map((group) => {
+          // Signed-in personal accounts see bar perks dimmed, with who they are for.
+          const usable = !user || usablePerkGroups(user.role).has(group.id)
+          return (
+            <div key={group.id} className={cn(!usable && "opacity-50")}>
+              <p className="flex items-center justify-between gap-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                {group.title}
+                {!usable && (
+                  <span className="rounded-full border border-border px-2 py-0.5 text-[10px] tracking-normal normal-case">
+                    {group.audience}
+                  </span>
+                )}
+              </p>
+              <ul className="mt-2 space-y-2">
+                {group.perks.map((perk) => (
+                  <li key={perk} className="flex gap-2">
+                    <Icon
+                      icon={CheckmarkCircle02Icon}
+                      className={cn(
+                        "size-5",
+                        usable ? "text-success" : "text-muted-foreground"
+                      )}
+                    />
+                    {perk}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        })}
+      </div>
       <Button
         size="lg"
         variant={recommended ? "default" : "outline"}
