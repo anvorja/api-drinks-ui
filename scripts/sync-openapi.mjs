@@ -1,8 +1,8 @@
 // Downloads the API contract into openapi/openapi.json (then run `pnpm api:types`).
-// Source: OPENAPI_URL, or VITE_API_URL + /docs/openapi.json from .env.local / .env.
+// Source: OPENAPI_URL, or VITE_API_URL + /docs/openapi.json from .env.
 import { existsSync, writeFileSync } from "node:fs"
 
-for (const file of [".env.local", ".env"]) {
+for (const file of [".env"]) {
   if (existsSync(file)) process.loadEnvFile(file)
 }
 const url =

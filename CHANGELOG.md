@@ -7,6 +7,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y
 
 ### Añadido
 
+- **Archivos de entorno ordenados.** Igual que en la API: `.env.example` (plantilla versionada),
+  `.env` (local, antes `.env.local`) y `.env.production` (Netlify). Los dos últimos están en
+  `.gitignore`.
 - **Despliegue en Netlify.**
   - `netlify.toml` y proxy de `/v1/*` hacia la API (`API_ORIGIN`), para que la cookie de sesión
     siga siendo del mismo sitio.
