@@ -28,6 +28,9 @@
           {
             "context": "Imagen Docker",
             "integration_id": 15368
+          },
+          {
+            "context": "netlify/crazydrinks-ui/deploy-preview"
           }
         ]
       }

@@ -109,10 +109,38 @@ ejemplo `app.midominio.com` y `api.midominio.com`. En la API:
 
 Corre en cada PR a `main` o `develop` y en cada push a esas ramas.
 
-| Job (check requerido) | Qué hace                                                                                                                                                                                                 |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Calidad y build**   | Prettier, `tsc`, ESLint, pruebas, `api:check` (cliente tipado al día) y build                                                                                                                            |
-| **Imagen Docker**     | En un PR: build y prueba de humo del contenedor (health, `config.js` y una ruta de la app). En un push a `main` o `develop`: publica `ghcr.io/<repo>` con las etiquetas `sha-<7>` y el nombre de la rama |
+| Job (check requerido)                    | Qué hace                                                                                                                                                                                                                                                      |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Calidad y build**                      | Prettier, `tsc`, ESLint, pruebas, `api:check` (cliente tipado al día), build y **configuración de Netlify**: corre `scripts/netlify-redirects.mjs` y comprueba que escribe el proxy de `/v1` y el fallback de la app, y que rechaza un `API_ORIGIN` sin https |
+| **Imagen Docker**                        | Build de la imagen y prueba de humo del contenedor: health, `config.js` y una ruta de la app                                                                                                                                                                  |
+| **Publicar imagen** (solo push a `main`) | Espera a los dos checks. Toma **la misma imagen** que se probó (no la reconstruye) y la sube a Docker Hub como `latest` y `<sha>` (7 caracteres)                                                                                                              |
+
+**Secretos** (_Settings → Secrets and variables → Actions_):
+
+- `DOCKER_USERNAME`: la imagen es `<usuario>/api-drinks-ui`;
+- `DOCKER_TOKEN`: access token de Docker Hub con permiso _Read & Write_.
+
+El frontend no despliega su imagen en ningún lado, porque el sitio lo publica Netlify. La imagen
+sirve para correrlo en cualquier otra plataforma.
+
+### Qué valida cada cosa antes de producción
+
+La imagen Docker y Netlify son **dos empaques distintos** del mismo build:
+
+| Empaque | Proxy y rutas                 | URL de la API                |
+| ------- | ----------------------------- | ---------------------------- |
+| Docker  | `docker/nginx.conf`           | `API_URL` al arrancar        |
+| Netlify | `netlify.toml` y `_redirects` | `VITE_API_URL=/` en el build |
+
+Que la imagen funcione prueba el código, no la configuración de Netlify. Por eso:
+
+1. "Calidad y build" verifica el script que genera `_redirects`.
+2. El **Deploy Preview de Netlify** es check obligatorio en `develop`. Si el build o la publicación
+   fallan en Netlify, el PR no se puede mergear.
+   - "Header rules" y "Redirect rules" solo informan que Netlify leyó las reglas; no hace falta
+     exigirlos aparte.
+3. Producción se despliega con el push a `develop`, y eso solo pasa al mergear un PR con todos los
+   checks aprobados.
 
 ## Rulesets
 
@@ -120,11 +148,16 @@ Corre en cada PR a `main` o `develop` y en cada push a esas ramas.
 
 - no se pueden borrar ni reescribir;
 - todo entra por PR;
-- los dos checks deben pasar.
+- deben pasar `Calidad y build` e `Imagen Docker`, y en `develop` también
+  `netlify/crazydrinks-ui/deploy-preview`.
 
 `main` solo acepta **merge commit** y `develop` solo **squash**.
 
-Para importarlos: _Settings → Rules → Rulesets → New ruleset → Import a ruleset_.
+El check de Netlify no se exige en `main`: Netlify solo genera Deploy Previews para los PR dirigidos
+a su rama de producción (`develop`). En `main` ese check nunca llegaría y bloquearía el release.
+
+Para importarlos: _Settings → Rules → Rulesets → New ruleset → Import a ruleset_. Si ya existen,
+edita el de `develop` y agrega el check.
 
 Los nombres de los jobs son los checks requeridos: si cambias uno en el workflow, cámbialo
 también en los rulesets.
