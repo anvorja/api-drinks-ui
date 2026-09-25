@@ -1,10 +1,31 @@
 <!doctype html>
-<html lang="en">
+<html lang="es" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vite-app</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#1b1036" />
+    <meta
+      name="description"
+      content="Crazy Drinks: descubre tu ADN de sabor, haz swipe entre cocteles, juega Cocktle y arma la carta de tu bar."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Crazy Drinks</title>
+    <!-- Theme before the first paint, so there is no flash of the wrong one. -->
+    <script>
+      try {
+        var t = localStorage.getItem("crazy-drinks.theme") || "dark"
+        var dark =
+          t === "dark" ||
+          (t === "system" && matchMedia("(prefers-color-scheme: dark)").matches)
+        document.documentElement.classList.toggle("dark", dark)
+        document.documentElement.classList.toggle("light", !dark)
+      } catch (e) {}
+    </script>
+    <!-- Runtime config in the Docker image (empty in development). -->
+    <script src="/config.js"></script>
   </head>
   <body>
     <div id="root"></div>
