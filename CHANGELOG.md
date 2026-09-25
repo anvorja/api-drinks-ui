@@ -7,6 +7,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y
 
 ### Añadido
 
+- **Despliegue en Netlify.**
+  - `netlify.toml` y proxy de `/v1/*` hacia la API (`API_ORIGIN`), para que la cookie de sesión
+    siga siendo del mismo sitio.
+  - `VITE_API_URL=/` significa "mismo origen".
 - **Base del frontend.**
   - React 19, TypeScript, Vite, shadcn/ui, Tailwind 4 y TanStack Query.
   - Arquitectura Context + Custom Hooks.

@@ -1,5 +1,57 @@
 # Despliegue
 
+## Netlify (frontend) + Render (API)
+
+El navegador ve `*.netlify.app` y `*.onrender.com` como **sitios distintos**. Si la app llamara
+directo a Render, la cookie de sesión sería de terceros y Safari, Firefox y Chrome la bloquean:
+la sesión se perdería al recargar o al volver de Wompi.
+
+Por eso **Netlify hace de proxy** de `/v1/*` hacia la API:
+
+- el navegador habla solo con `https://<app>.netlify.app`;
+- la cookie queda en el mismo sitio, con `SameSite=Lax` y `Path=/v1/auth`;
+- las rutas de la app no empiezan por `/v1`, así que no chocan con el proxy.
+
+`netlify.toml` fija el build, Node 24, pnpm y las cabeceras.
+`scripts/netlify-redirects.mjs` genera `dist/_redirects` (el proxy y el fallback de la app)
+a partir de `API_ORIGIN`, sin URLs fijas en el código.
+
+### Variables en Netlify
+
+_Site configuration → Environment variables_. Ninguna es secreta.
+
+| Variable             | Valor                             | Para qué                                                       |
+| -------------------- | --------------------------------- | -------------------------------------------------------------- |
+| `VITE_API_URL`       | `/`                               | La API se llama en el mismo origen, a través del proxy         |
+| `API_ORIGIN`         | `https://api-drinks.onrender.com` | Adónde envía el proxy `/v1/*`: la URL de Render, sin `/` final |
+| `VITE_DEMO_ACCOUNTS` | `true`                            | Opcional: cuentas demo en la pantalla de entrada               |
+
+Las `VITE_*` se fijan en el build: si cambias una, vuelve a desplegar.
+
+### Variables en Render (API)
+
+Además de las de base de datos, JWT, Wompi y demás del `.env.example` de la API:
+
+| Variable                  | Valor                                                           |
+| ------------------------- | --------------------------------------------------------------- |
+| `NODE_ENV`                | `production`                                                    |
+| `TRUST_PROXY`             | `true` (Netlify y Render van delante; así la API ve la IP real) |
+| `CORS_ORIGINS`            | `https://<app>.netlify.app`                                     |
+| `REFRESH_COOKIE_SAMESITE` | `lax`                                                           |
+| `REFRESH_COOKIE_SECURE`   | `true`                                                          |
+| `REFRESH_COOKIE_DOMAIN`   | vacía                                                           |
+| `PAYMENTS_REDIRECT_URL`   | `https://<app>.netlify.app/pago/resultado`                      |
+| `PASSWORD_RESET_URL`      | `https://<app>.netlify.app/restablecer-contrasena`              |
+| `MIGRATE_ON_START`        | `true`                                                          |
+
+- **Puerto:** Render define `PORT` solo.
+- **Health check:** `/health/ready`.
+- **Webhook de Wompi:** los eventos van directo a Render,
+  `https://api-drinks.onrender.com/v1/webhooks/wompi`.
+- **Plan gratis de Render:** duerme tras la inactividad y tarda en despertar. El proxy de
+  Netlify corta a los ~26 s, así que la primera petición puede fallar con `502` hasta que la API
+  despierte. En un plan pago no pasa.
+
 ## Imagen Docker
 
 - **Build:** Node 24 construye la app con el lockfile exacto.
