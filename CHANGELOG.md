@@ -8,8 +8,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y
 ### Cambiado
 
 - **Publicación en Docker Hub.**
-  - Con cada push a `main`, y solo después de los checks, la imagen probada (sin reconstruir) se
-    sube como `latest` y `<sha>`.
+  - Con cada push a `develop` o `main`, y solo después de los checks, la imagen probada (sin
+    reconstruir) se sube con su canal (`develop` o `latest`) y el `<sha>`.
   - Reemplaza a GHCR.
 - **Verificaciones de Netlify.**
   - La CI verifica la configuración de Netlify (proxy de `/v1` y fallback).

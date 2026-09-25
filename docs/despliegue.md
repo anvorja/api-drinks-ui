@@ -109,19 +109,27 @@ ejemplo `app.midominio.com` y `api.midominio.com`. En la API:
 
 Corre en cada PR a `main` o `develop` y en cada push a esas ramas.
 
-| Job (check requerido)                    | Qué hace                                                                                                                                                                                                                                                      |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Calidad y build**                      | Prettier, `tsc`, ESLint, pruebas, `api:check` (cliente tipado al día), build y **configuración de Netlify**: corre `scripts/netlify-redirects.mjs` y comprueba que escribe el proxy de `/v1` y el fallback de la app, y que rechaza un `API_ORIGIN` sin https |
-| **Imagen Docker**                        | Build de la imagen y prueba de humo del contenedor: health, `config.js` y una ruta de la app                                                                                                                                                                  |
-| **Publicar imagen** (solo push a `main`) | Espera a los dos checks. Toma **la misma imagen** que se probó (no la reconstruye) y la sube a Docker Hub como `latest` y `<sha>` (7 caracteres)                                                                                                              |
+| Job (check requerido)                           | Qué hace                                                                                                                                                                                                                                                      |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Calidad y build**                             | Prettier, `tsc`, ESLint, pruebas, `api:check` (cliente tipado al día), build y **configuración de Netlify**: corre `scripts/netlify-redirects.mjs` y comprueba que escribe el proxy de `/v1` y el fallback de la app, y que rechaza un `API_ORIGIN` sin https |
+| **Imagen Docker**                               | Build de la imagen y prueba de humo del contenedor: health, `config.js` y una ruta de la app                                                                                                                                                                  |
+| **Publicar imagen** (push a `develop` o `main`) | Espera a los dos checks. Toma **la misma imagen** que se probó (no la reconstruye) y la sube a Docker Hub con su canal (`develop` o `latest`) y el `<sha>` (7 caracteres)                                                                                     |
 
 **Secretos** (_Settings → Secrets and variables → Actions_):
 
 - `DOCKER_USERNAME`: la imagen es `<usuario>/api-drinks-ui`;
 - `DOCKER_TOKEN`: access token de Docker Hub con permiso _Read & Write_.
 
-El frontend no despliega su imagen en ningún lado, porque el sitio lo publica Netlify. La imagen
-sirve para correrlo en cualquier otra plataforma.
+**Ambientes:**
+
+| Ambiente       | Rama              | Sitio                                                                   | Imagen en Docker Hub |
+| -------------- | ----------------- | ----------------------------------------------------------------------- | -------------------- |
+| **Staging**    | `develop`         | Netlify (`crazydrinks-ui.netlify.app`), con la API de staging en Render | `develop` y `<sha>`  |
+| **Producción** | `main` (releases) | Servicios propios, por definir                                          | `latest` y `<sha>`   |
+
+- En staging, Netlify despliega el sitio solo; la imagen queda en Docker Hub para correrlo en
+  cualquier otro lado.
+- Producción usará `latest` o el `<sha>` de un release.
 
 ### Qué valida cada cosa antes de producción
 

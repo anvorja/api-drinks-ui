@@ -91,8 +91,9 @@ Ver [docs/despliegue.md](docs/despliegue.md).
 4. **CI/CD con GitHub Actions.**
    - Cada PR a `main` o `develop` pasa por calidad, pruebas, build, configuración de Netlify e
      imagen Docker.
-   - Cada push a `main` publica en Docker Hub la imagen ya probada, como `latest` y `<sha>`.
-   - El sitio lo despliega Netlify.
+   - Cada push a `develop` o `main` publica en Docker Hub la imagen ya probada: `develop` + `<sha>`
+     (staging) o `latest` + `<sha>` (producción).
+   - El sitio de staging lo despliega Netlify desde `develop`.
 5. **Rulesets de GitHub.** `main` y `develop` están protegidas. Sus definiciones están versionadas
    en `.github/rulesets/` y se importan en _Settings → Rules → Rulesets → Import a ruleset_.
    - Exigen los checks `Calidad y build` e `Imagen Docker`.
