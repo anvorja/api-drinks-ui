@@ -88,11 +88,16 @@ Ver [docs/despliegue.md](docs/despliegue.md).
 
 3. **TanStack Query** para todo dato que viene de la API. Los contextos quedan para el estado
    global de la app (sesión y tema).
-4. **CI/CD con GitHub Actions.** Cada PR a `main` o `develop` pasa por calidad, pruebas, build e
-   imagen Docker. Cada push a esas ramas publica la imagen en GitHub Container Registry.
+4. **CI/CD con GitHub Actions.**
+   - Cada PR a `main` o `develop` pasa por calidad, pruebas, build, configuración de Netlify e
+     imagen Docker.
+   - Cada push a `develop` o `main` publica en Docker Hub la imagen ya probada: `develop` + `<sha>`
+     (staging) o `latest` + `<sha>` (producción).
+   - El sitio de staging lo despliega Netlify desde `develop`.
 5. **Rulesets de GitHub.** `main` y `develop` están protegidas. Sus definiciones están versionadas
    en `.github/rulesets/` y se importan en _Settings → Rules → Rulesets → Import a ruleset_.
-   Exigen los checks `Calidad y build` e `Imagen Docker`.
+   - Exigen los checks `Calidad y build` e `Imagen Docker`.
+   - `develop` exige además el Deploy Preview de Netlify.
 6. **Documentación en `docs/`**, igual que en la API.
 7. **Tema claro y oscuro**, con un interruptor en la barra superior. El oscuro es el
    predeterminado; la elección se recuerda.
