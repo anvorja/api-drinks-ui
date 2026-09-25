@@ -40,6 +40,11 @@ const PAYMENT_STATUS: Record<
   },
   voided: { label: "Anulado", className: "bg-muted text-muted-foreground" },
   error: { label: "Error", className: "bg-destructive/15 text-destructive" },
+  // A checkout that expired unpaid: nothing was charged. Hidden unless asked for.
+  expired: {
+    label: "Sin completar",
+    className: "bg-muted text-muted-foreground",
+  },
 }
 
 export default function AccountPage() {
@@ -233,7 +238,10 @@ function Profile() {
 
 function Payments() {
   const payments = usePayments()
-  const items = payments.data ?? []
+  const [showExpired, setShowExpired] = useState(false)
+  const all = payments.data ?? []
+  const expiredCount = all.filter((p) => p.status === "expired").length
+  const items = showExpired ? all : all.filter((p) => p.status !== "expired")
 
   return (
     <section aria-labelledby="pagos">
@@ -296,6 +304,20 @@ function Payments() {
             </tbody>
           </table>
         </div>
+      )}
+      {expiredCount > 0 && (
+        <Button
+          variant="link"
+          className="mt-2 h-auto px-0 text-muted-foreground"
+          aria-expanded={showExpired}
+          onClick={() => setShowExpired((v) => !v)}
+        >
+          {showExpired
+            ? "Ocultar los intentos sin completar"
+            : `Mostrar ${expiredCount} ${
+                expiredCount === 1 ? "intento" : "intentos"
+              } sin completar (no se cobró nada)`}
+        </Button>
       )}
     </section>
   )

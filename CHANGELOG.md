@@ -5,6 +5,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y
 
 ## [Unreleased]
 
+### Añadido
+
+- **Pagos sin completar** (requiere la API con la migración `0014`).
+  - Los checkouts que vencieron sin pagarse (`expired`) se ocultan del historial de pagos, con un
+    botón para verlos marcados como "Sin completar".
+  - `/pago/resultado` explica que el enlace venció y que no se cobró nada.
+
 ### Cambiado
 
 - **Publicación en Docker Hub.**
