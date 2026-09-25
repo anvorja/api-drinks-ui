@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/hooks/useAuth"
 import { ROLE_LABEL } from "@/lib/roles"
-import { ACCOUNT_NAV } from "./nav"
+import { ACCOUNT_NAV, isNavItemVisible } from "./nav"
 
 const initials = (name: string) =>
   name
@@ -70,14 +70,16 @@ export function UserMenu() {
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {ACCOUNT_NAV.map((item) => (
-          <DropdownMenuItem key={item.to} asChild>
-            <Link to={item.to}>
-              <Icon icon={item.icon} className="size-4" />
-              {item.label}
-            </Link>
-          </DropdownMenuItem>
-        ))}
+        {ACCOUNT_NAV.filter((item) => isNavItemVisible(item, user)).map(
+          (item) => (
+            <DropdownMenuItem key={item.to} asChild>
+              <Link to={item.to}>
+                <Icon icon={item.icon} className="size-4" />
+                {item.label}
+              </Link>
+            </DropdownMenuItem>
+          )
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={onLogout} variant="destructive">
           <Icon icon={Logout01Icon} className="size-4" />

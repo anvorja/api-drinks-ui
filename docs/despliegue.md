@@ -12,6 +12,25 @@ Por eso **Netlify hace de proxy** de `/v1/*` hacia la API:
 - la cookie queda en el mismo sitio, con `SameSite=Lax` y `Path=/v1/auth`;
 - las rutas de la app no empiezan por `/v1`, así que no chocan con el proxy.
 
+### Volver de Wompi sin perder la sesión
+
+1. Pagar en Wompi saca al navegador de la app. El access token vivía en memoria, así que se pierde.
+2. Wompi redirige a `https://<app>.netlify.app/pago/resultado?id=<transacción>&env=test`.
+3. La app carga y llama a `POST /v1/auth/refresh` **en su propio origen**. Netlify lo reenvía a
+   Render. La cookie `refresh_token` viaja porque, para el navegador, es del mismo sitio. La sesión
+   se recupera.
+4. `/pago/resultado` llama a `POST /v1/me/payments/verify` y muestra el resultado. Mientras el pago
+   siga pendiente, vuelve a preguntar.
+5. El botón principal depende de la cuenta (`nextStepAfterUpgrade` en `src/lib/entitlements.ts`):
+
+   | Cuenta   | Botón                                              |
+   | -------- | -------------------------------------------------- |
+   | De bar   | "Ver mi carta con márgenes"                        |
+   | Personal | "Crear mi llave de API", que lleva a `/cuenta#api` |
+
+Sin el proxy, el paso 3 falla: la cookie sería de terceros, el refresh no la llevaría y la persona
+volvería del pago sin sesión.
+
 `netlify.toml` fija el build, Node 24, pnpm y las cabeceras.
 `scripts/netlify-redirects.mjs` genera `dist/_redirects` (el proxy y el fallback de la app)
 a partir de `API_ORIGIN`, sin URLs fijas en el código.

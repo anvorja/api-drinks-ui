@@ -7,7 +7,9 @@ import { EmptyState, ErrorState } from "@/components/common/States"
 import { Button } from "@/components/ui/button"
 import type { Payment } from "@/hooks/api/types"
 import { useVerifyPayment } from "@/hooks/api/useBilling"
+import { useAuth } from "@/hooks/useAuth"
 import { useDocumentTitle } from "@/hooks/useDocumentTitle"
+import { nextStepAfterUpgrade } from "@/lib/entitlements"
 import { formatDateTime, formatMoney } from "@/lib/format"
 
 const POLL_MS = 3000
@@ -20,7 +22,7 @@ const STATUS: Record<
   approved: {
     emoji: "🥂",
     title: "¡Pago aprobado!",
-    text: "Tu plan ya está activo. Que empiece la fiesta (con moderación).",
+    text: "Tu plan ya está activo.",
   },
   pending: {
     emoji: "⏳",
@@ -50,6 +52,8 @@ const STATUS: Record<
  */
 export default function PaymentResultPage() {
   useDocumentTitle("Resultado del pago")
+  const { user } = useAuth()
+  const nextStep = nextStepAfterUpgrade(user?.role)
   const [params] = useSearchParams()
   const transactionId = params.get("id")
   const verify = useVerifyPayment()
@@ -131,7 +135,9 @@ export default function PaymentResultPage() {
           {view.emoji}
         </motion.span>
         <h1 className="mt-4 text-3xl font-bold">{view.title}</h1>
-        <p className="mt-2 text-muted-foreground">{view.text}</p>
+        <p className="mt-2 text-muted-foreground">
+          {payment?.status === "approved" ? nextStep.hint : view.text}
+        </p>
 
         {payment && (
           <dl className="mx-auto mt-8 grid max-w-sm grid-cols-2 gap-3 text-left text-sm">
@@ -155,7 +161,7 @@ export default function PaymentResultPage() {
         <div className="mt-8 flex flex-wrap justify-center gap-2">
           {payment?.status === "approved" ? (
             <Button asChild size="lg" className="rounded-full">
-              <Link to="/mi-bar">Ir a mi bar</Link>
+              <Link to={nextStep.to}>{nextStep.label}</Link>
             </Button>
           ) : payment && payment.status !== "pending" ? (
             <Button asChild size="lg" className="rounded-full">

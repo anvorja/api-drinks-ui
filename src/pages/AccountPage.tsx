@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react"
 import { Link, useNavigate } from "react-router"
 import { toast } from "sonner"
 
+import { ApiKeysSection } from "@/components/account/ApiKeysSection"
 import { FormField } from "@/components/auth/FormField"
 import { Icon } from "@/components/common/Icon"
 import { Page, PageHeader } from "@/components/common/PageHeader"
@@ -71,6 +72,7 @@ export default function AccountPage() {
         <Subscription />
         <Profile />
       </div>
+      <ApiKeysSection />
       <Payments />
       <Favorites />
     </Page>
