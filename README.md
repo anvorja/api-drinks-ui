@@ -61,8 +61,10 @@ Solo las `VITE_*` llegan al navegador: **nunca pongas secretos aquí**.
 | `VITE_API_URL`       | `http://lvh.me:8090` | URL base de la API                    |
 | `VITE_DEMO_ACCOUNTS` | `true`               | Muestra las cuentas demo al entrar    |
 
-En Docker la URL de la API se da en tiempo de ejecución con `API_URL`
-(ver [docs/despliegue.md](docs/despliegue.md)).
+- **Netlify:** `VITE_API_URL=/`, porque la API se llama a través del proxy en el mismo origen.
+- **Docker:** la URL de la API se da en tiempo de ejecución con `API_URL`.
+
+Ver [docs/despliegue.md](docs/despliegue.md).
 
 ## Directrices del proyecto
 
@@ -95,7 +97,7 @@ En Docker la URL de la API se da en tiempo de ejecución con `API_URL`
 - [Arquitectura](docs/arquitectura.md): capas, flujo de datos, sesión y manejo de errores.
 - [Desarrollo local](docs/desarrollo-local.md): `lvh.me`, CORS, cookie de sesión y pagos con Wompi.
 - [Diseño](docs/diseno.md): identidad visual, tokens, componentes y responsive.
-- [Despliegue](docs/despliegue.md): imagen Docker, CI/CD y rulesets.
+- [Despliegue](docs/despliegue.md): Netlify + Render, imagen Docker, CI/CD y rulesets.
 
 ## Atribución
 

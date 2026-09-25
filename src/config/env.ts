@@ -1,7 +1,10 @@
 /**
- * Runtime configuration. In the Docker image, `/config.js` sets `window.__APP_CONFIG__` from the
- * container environment, so one build serves any API. In development it comes from Vite
- * (`VITE_*` in .env.local).
+ * Runtime configuration.
+ * - Docker: `/config.js` sets `window.__APP_CONFIG__` from the container environment, so one
+ *   build serves any API.
+ * - Development and Netlify: `VITE_API_URL`, fixed at build time. `VITE_API_URL=/` means the same
+ *   origin: the host proxies /v1/* to the API (see netlify.toml), which keeps the session cookie
+ *   first-party.
  */
 declare global {
   interface Window {
