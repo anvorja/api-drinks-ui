@@ -28,7 +28,7 @@ Requisitos: Node 24 y pnpm 12 (`corepack enable`), y la API corriendo.
 
 ```bash
 pnpm install
-cp .env.example .env.local   # ajusta si hace falta
+cp .env.example .env         # valores locales; ajusta si hace falta
 pnpm dev                     # http://lvh.me:5173
 ```
 
@@ -52,6 +52,12 @@ entrar con un clic.
 | `pnpm api:check`                                     | Falla si el cliente tipado no corresponde al contrato (lo corre la CI) |
 
 ## Variables de entorno
+
+| Archivo           | Para qué                                                | ¿Se sube?             |
+| ----------------- | ------------------------------------------------------- | --------------------- |
+| `.env.example`    | Plantilla con todas las variables                       | Sí                    |
+| `.env`            | Valores locales para `pnpm dev`                         | **No** (`.gitignore`) |
+| `.env.production` | Valores de Netlify; Vite también lo usa en `pnpm build` | **No** (`.gitignore`) |
 
 Solo las `VITE_*` llegan al navegador: **nunca pongas secretos aquí**.
 

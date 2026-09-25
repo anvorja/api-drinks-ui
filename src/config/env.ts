@@ -14,7 +14,7 @@ declare global {
 
 function required(name: string, value: string | undefined): string {
   if (!value) {
-    throw new Error(`Missing ${name}: copy .env.example to .env.local`)
+    throw new Error(`Missing ${name}: copy .env.example to .env`)
   }
   return value.replace(/\/+$/, "")
 }
