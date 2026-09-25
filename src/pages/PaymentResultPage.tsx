@@ -44,6 +44,11 @@ const STATUS: Record<
     title: "Hubo un error con el pago",
     text: "Wompi reportó un error. Intenta de nuevo en unos minutos.",
   },
+  expired: {
+    emoji: "⌛",
+    title: "El enlace de pago venció",
+    text: "No se completó el pago a tiempo y no se hizo ningún cobro. Puedes intentarlo de nuevo.",
+  },
 }
 
 /**
